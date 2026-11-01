@@ -15,7 +15,7 @@ class User extends Authenticatable
 
     protected $fillable = [
         'name', 'email', 'phone', 'password',
-        'role', 'account_status',
+        'role', 'account_status', 'restaurant_id',
     ];
 
     protected $hidden = ['password', 'remember_token'];
@@ -26,6 +26,11 @@ class User extends Authenticatable
         'role'              => UserRole::class,
         'account_status'    => AccountStatus::class,
     ];
+
+    public function restaurant()
+    {
+        return $this->belongsTo(Restaurant::class);
+    }
 
     public function isApproved(): bool
     {
