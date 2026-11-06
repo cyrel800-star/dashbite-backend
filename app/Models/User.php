@@ -32,6 +32,11 @@ class User extends Authenticatable
         return $this->belongsTo(Restaurant::class);
     }
 
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'customer_id');
+    }
+
     public function isApproved(): bool
     {
         return $this->account_status === AccountStatus::Approved;

@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\RestaurantMenuController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\OtpController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\CheckoutController;
 
 // ============================================
 // AUTH (public)
@@ -27,7 +28,13 @@ Route::prefix('catalog')->group(function () {
     Route::get('restaurants/{id}', [CatalogController::class, 'showRestaurant']);
     Route::get('restaurants/{id}/menu', [CatalogController::class, 'menu']);
 });
-
+// ============================================
+// CHECKOUT (protected — role:customer + approved)
+// ============================================
+Route::middleware(['auth:sanctum', 'role:customer', 'approved'])->prefix('checkout')->group(function () {
+    Route::post('/', [CheckoutController::class, 'store']);
+    Route::get('orders/{id}', [CheckoutController::class, 'show']);
+});
 // ============================================
 // RESTAURANT PORTAL (protected — role:restaurant + approved)
 // ============================================

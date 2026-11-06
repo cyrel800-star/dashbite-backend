@@ -34,7 +34,11 @@ class Restaurant extends Model
         return $this->hasMany(User::class);
     }
 
-    // Scope: orderable = open AND not disabled
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
     public function scopeOrderable($query)
     {
         return $query->where('is_open', true)->where('is_disabled', false);
