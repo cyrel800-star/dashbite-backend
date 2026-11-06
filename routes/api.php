@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\OtpController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\CheckoutController;
+use App\Http\Controllers\Api\RestaurantOrderController;
 
 // ============================================
 // AUTH (public)
@@ -39,15 +40,20 @@ Route::middleware(['auth:sanctum', 'role:customer', 'approved'])->prefix('checko
 // RESTAURANT PORTAL (protected — role:restaurant + approved)
 // ============================================
 Route::middleware(['auth:sanctum', 'role:restaurant', 'approved'])->prefix('restaurant')->group(function () {
-    // Menu management
+    // Menu
     Route::get('menu', [RestaurantMenuController::class, 'index']);
     Route::post('menu/items', [RestaurantMenuController::class, 'store']);
     Route::put('menu/items/{id}', [RestaurantMenuController::class, 'update']);
     Route::patch('menu/items/{id}/availability', [RestaurantMenuController::class, 'toggleAvailability']);
     Route::delete('menu/items/{id}', [RestaurantMenuController::class, 'destroy']);
 
-    // Orders (stub — W4.01 will implement)
-    Route::post('orders/{id}/accept', fn () => response()->json(['ok' => true]));
+    // Orders (W4.01)
+    Route::get('orders', [RestaurantOrderController::class, 'index']);
+    Route::get('orders/{id}', [RestaurantOrderController::class, 'show']);
+    Route::post('orders/{id}/accept', [RestaurantOrderController::class, 'accept']);
+    Route::post('orders/{id}/reject', [RestaurantOrderController::class, 'reject']);
+    Route::patch('orders/{id}/preparing', [RestaurantOrderController::class, 'markPreparing']);
+    Route::patch('orders/{id}/ready', [RestaurantOrderController::class, 'markReady']);
 });
 
 // ============================================

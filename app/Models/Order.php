@@ -72,4 +72,8 @@ class Order extends Model
     {
         return $this->status === OrderStatus::Pending;
     }
+public function statusHistory()
+{
+    return $this->hasMany(OrderStatusHistory::class)->orderBy('created_at');
+}
 }
