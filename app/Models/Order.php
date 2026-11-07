@@ -82,4 +82,12 @@ public function statusHistory()
 {
     return $this->hasMany(OrderStatusHistory::class)->orderBy('created_at');
 }
+public function paymentRecord()
+{
+    return $this->hasOne(PaymentRecord::class);
+}
+public function dispatchAttempts()
+{
+    return $this->hasMany(DispatchAttempt::class);
+}
 }
