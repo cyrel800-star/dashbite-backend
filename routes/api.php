@@ -11,6 +11,9 @@ use App\Http\Controllers\Api\RiderController;
 use App\Http\Controllers\Api\AdminPaymentController;
 use App\Http\Controllers\Api\AdminUserController;
 use App\Http\Controllers\Api\AdminSettingController;
+use App\Http\Controllers\Api\RatingController;
+use App\Http\Controllers\Api\AdminMonitoringController;
+use App\Http\Controllers\Api\ComplaintController;
 
 
 // ============================================
@@ -40,6 +43,10 @@ Route::prefix('catalog')->group(function () {
 Route::middleware(['auth:sanctum', 'role:customer', 'approved'])->prefix('checkout')->group(function () {
     Route::post('/', [CheckoutController::class, 'store']);
     Route::get('orders/{id}', [CheckoutController::class, 'show']);
+    
+    // W7.01 — Customer rating & complaint
+    Route::post('orders/{id}/rate', [RatingController::class, 'store']);
+    Route::post('complaints', [ComplaintController::class, 'store']);
 });
 // ============================================
 // RESTAURANT PORTAL (protected — role:restaurant + approved)
@@ -85,4 +92,8 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
     Route::get('payments/{id}', [AdminPaymentController::class, 'show']);
     Route::post('payments/{id}/remittance', [AdminPaymentController::class, 'recordRemittance']);
     Route::post('payments/{id}/payout', [AdminPaymentController::class, 'recordPayout']);
+    Route::get('ratings', [AdminMonitoringController::class, 'ratings']);
+    Route::get('attendance', [AdminMonitoringController::class, 'attendance']);
+    Route::get('complaints', [AdminMonitoringController::class, 'complaints']);
+    Route::post('complaints/{id}/resolve', [AdminMonitoringController::class, 'resolveComplaint']);
 });

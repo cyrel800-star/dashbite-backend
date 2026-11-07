@@ -93,4 +93,8 @@ public function dispatchAttempts()
 {
     return $this->hasMany(DispatchAttempt::class);
 }
+public function rating()
+{
+    return $this->hasOne(Rating::class);
+}
 }
