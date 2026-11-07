@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\OtpController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\CheckoutController;
 use App\Http\Controllers\Api\RestaurantOrderController;
+use App\Http\Controllers\Api\RiderController;
 
 // ============================================
 // AUTH (public)
@@ -61,7 +62,9 @@ Route::middleware(['auth:sanctum', 'role:restaurant', 'approved'])->prefix('rest
 // RIDER PORTAL (protected — role:rider + approved)
 // ============================================
 Route::middleware(['auth:sanctum', 'role:rider', 'approved'])->prefix('rider')->group(function () {
-    Route::post('availability', fn () => response()->json(['ok' => true]));
+    Route::get('status', [RiderController::class, 'status']);
+    Route::post('availability', [RiderController::class, 'setAvailability']);
+    Route::patch('location', [RiderController::class, 'updateLocation']);
 });
 
 // ============================================

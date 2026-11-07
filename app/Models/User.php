@@ -41,4 +41,8 @@ class User extends Authenticatable
     {
         return $this->account_status === AccountStatus::Approved;
     }
+public function riderProfile()
+{
+    return $this->hasOne(RiderProfile::class);
+}
 }
