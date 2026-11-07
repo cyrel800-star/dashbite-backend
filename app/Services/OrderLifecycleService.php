@@ -100,4 +100,31 @@ class OrderLifecycleService
 
         return $order->fresh();
     }
+    /**
+     * W6.02: Rider confirms pickup from restaurant.
+     */
+    public function markPickedUp(Order $order, \App\Models\User $actor): Order
+    {
+        return $this->transition($order, OrderStatus::PickedUp, $actor);
+    }
+
+    /**
+     * W6.02: Rider confirms delivery. If COD, cash_collected must be recorded.
+     */
+    public function markDelivered(Order $order, \App\Models\User $actor, ?float $cashCollected = null): Order
+    {
+        if ($order->payment_method === \App\Enums\PaymentMethod::Cod) {
+            if ($cashCollected === null) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'cash_collected' => ['Cash amount is required for COD orders.'],
+                ]);
+            }
+            $order->update([
+                'cash_collected'    => $cashCollected,
+                'cash_collected_at' => now(),
+            ]);
+        }
+
+        return $this->transition($order, OrderStatus::Delivered, $actor);
+    }
 }

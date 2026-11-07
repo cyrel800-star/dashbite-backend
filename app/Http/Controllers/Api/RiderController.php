@@ -7,7 +7,10 @@ use App\Services\RiderService;
 use Illuminate\Http\Request;
 use App\Models\DispatchOffer;
 use App\Services\DispatchService;
-
+use App\Models\Order;
+use App\Models\User;
+use App\Services\OrderLifecycleService;
+use Illuminate\Validation\ValidationException;
 class RiderController extends Controller
 {
     public function __construct(private RiderService $riderService)
@@ -114,5 +117,85 @@ class RiderController extends Controller
                 'status'   => 'assigned',
             ],
         ]);
+    }
+    /**
+     * W6.02: Rider marks order as picked up.
+     */
+    public function markPickedUp(Request $request, int $orderId)
+    {
+        $order = $this->findRiderOrder($request->user(), $orderId);
+
+        try {
+            $order = app(OrderLifecycleService::class)->markPickedUp($order, $request->user());
+        } catch (ValidationException $e) {
+            return response()->json([
+                'error'  => 'invalid_transition',
+                'errors' => $e->errors(),
+            ], 422);
+        }
+
+        return response()->json([
+            'message' => 'Order marked as picked up.',
+            'data'    => $order,
+        ]);
+    }
+
+    /**
+     * W6.02: Rider marks order as delivered + records COD.
+     */
+    public function markDelivered(Request $request, int $orderId)
+    {
+        $order = $this->findRiderOrder($request->user(), $orderId);
+
+        $data = $request->validate([
+            'cash_collected' => ['nullable', 'numeric', 'min:0'],
+        ]);
+
+        try {
+            $order = app(OrderLifecycleService::class)->markDelivered(
+                $order,
+                $request->user(),
+                isset($data['cash_collected']) ? (float) $data['cash_collected'] : null
+            );
+        } catch (ValidationException $e) {
+            return response()->json([
+                'error'  => 'invalid_transition',
+                'errors' => $e->errors(),
+            ], 422);
+        }
+
+        // Free up rider for next dispatch
+        \App\Models\RiderProfile::where('user_id', $request->user()->id)
+            ->update(['is_available' => true]);
+
+        return response()->json([
+            'message' => 'Order delivered.',
+            'data'    => $order,
+        ]);
+    }
+
+    /**
+     * Helper: ensure the order is currently assigned to this rider
+     * (via dispatch_attempts winner OR order status).
+     */
+    private function findRiderOrder(User $rider, int $orderId): Order
+    {
+        $order = Order::find($orderId);
+
+        if (! $order) {
+            abort(response()->json(['error' => 'order_not_found'], 404));
+        }
+
+        // Verify the order is currently assigned to this rider via dispatch attempt
+        $assignedTo = \App\Models\DispatchAttempt::where('order_id', $order->id)
+            ->where('status', 'assigned')
+            ->where('winner_rider_id', $rider->id)
+            ->exists();
+
+        if (! $assignedTo) {
+            abort(response()->json(['error' => 'order_not_assigned_to_you'], 403));
+        }
+
+        return $order;
     }
 }

@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\CheckoutController;
 use App\Http\Controllers\Api\RestaurantOrderController;
 use App\Http\Controllers\Api\RiderController;
 
+
 // ============================================
 // AUTH (public)
 // ============================================
@@ -65,6 +66,8 @@ Route::middleware(['auth:sanctum', 'role:rider', 'approved'])->prefix('rider')->
     Route::get('status', [RiderController::class, 'status']);
     Route::post('availability', [RiderController::class, 'setAvailability']);
     Route::patch('location', [RiderController::class, 'updateLocation']);
+    Route::patch('orders/{id}/pickup', [RiderController::class, 'markPickedUp']);
+    Route::patch('orders/{id}/delivered', [RiderController::class, 'markDelivered']);
     Route::post('offers/{id}/accept', [RiderController::class, 'acceptOffer']);
 });
 
