@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Services\RiderService;
 use Illuminate\Http\Request;
+use App\Models\DispatchOffer;
+use App\Services\DispatchService;
 
 class RiderController extends Controller
 {
@@ -82,6 +84,34 @@ class RiderController extends Controller
                 'last_location_at' => $profile->last_location_at?->toIso8601String(),
                 'has_fresh_location' => $profile->hasFreshLocation(),
                 'is_eligible'      => $profile->isEligibleForDispatch(),
+            ],
+        ]);
+    }
+    /**
+     * W6.01: Accept a dispatch offer (race-safe).
+     */
+    public function acceptOffer(Request $request, int $offerId)
+    {
+        $offer = DispatchOffer::find($offerId);
+
+        if (! $offer || $offer->rider_id !== $request->user()->id) {
+            return response()->json(['error' => 'offer_not_found'], 404);
+        }
+
+        $won = app(DispatchService::class)->accept($offer, $request->user());
+
+        if (! $won) {
+            return response()->json([
+                'error'   => 'offer_no_longer_available',
+                'message' => 'This offer was already accepted by another rider or expired.',
+            ], 409);
+        }
+
+        return response()->json([
+            'message' => 'Offer accepted.',
+            'data'    => [
+                'order_id' => $offer->order_id,
+                'status'   => 'assigned',
             ],
         ]);
     }

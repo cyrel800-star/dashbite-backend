@@ -65,6 +65,7 @@ Route::middleware(['auth:sanctum', 'role:rider', 'approved'])->prefix('rider')->
     Route::get('status', [RiderController::class, 'status']);
     Route::post('availability', [RiderController::class, 'setAvailability']);
     Route::patch('location', [RiderController::class, 'updateLocation']);
+    Route::post('offers/{id}/accept', [RiderController::class, 'acceptOffer']);
 });
 
 // ============================================
