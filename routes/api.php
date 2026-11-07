@@ -50,6 +50,7 @@ Route::middleware(['auth:sanctum', 'role:restaurant', 'approved'])->prefix('rest
     // Orders (W4.01)
     Route::get('orders', [RestaurantOrderController::class, 'index']);
     Route::get('orders/{id}', [RestaurantOrderController::class, 'show']);
+    Route::post('orders/external', [RestaurantOrderController::class, 'storeExternal']); // W4.03
     Route::post('orders/{id}/accept', [RestaurantOrderController::class, 'accept']);
     Route::post('orders/{id}/reject', [RestaurantOrderController::class, 'reject']);
     Route::patch('orders/{id}/preparing', [RestaurantOrderController::class, 'markPreparing']);
