@@ -9,6 +9,8 @@ use App\Http\Controllers\Api\CheckoutController;
 use App\Http\Controllers\Api\RestaurantOrderController;
 use App\Http\Controllers\Api\RiderController;
 use App\Http\Controllers\Api\AdminPaymentController;
+use App\Http\Controllers\Api\AdminUserController;
+use App\Http\Controllers\Api\AdminSettingController;
 
 
 // ============================================
@@ -76,7 +78,9 @@ Route::middleware(['auth:sanctum', 'role:rider', 'approved'])->prefix('rider')->
 // ADMIN (protected — role:admin)
 // ============================================
 Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(function () {
-    Route::post('users/{id}/approve', fn () => response()->json(['ok' => true]));
+    Route::post('users/{id}/approve', [AdminUserController::class, 'approve']);
+    Route::get('settings', [AdminSettingController::class, 'showSettings']);
+    Route::patch('settings/fee', [AdminSettingController::class, 'updateFee']);
     Route::get('payments', [AdminPaymentController::class, 'index']);
     Route::get('payments/{id}', [AdminPaymentController::class, 'show']);
     Route::post('payments/{id}/remittance', [AdminPaymentController::class, 'recordRemittance']);

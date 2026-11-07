@@ -59,6 +59,8 @@ class CheckoutService
         return DB::transaction(function () use ($customer, $restaurant, $payload, $itemsData, $subtotal, $deliveryFee, $total) {
             $order = Order::create([
                 'idempotency_key'  => $payload['idempotency_key'],
+                'frozen_delivery_fee'     => $deliveryFee,
+                'frozen_service_boundary' => $restaurant->service_boundary,
                 'customer_id'      => $customer->id,
                 'restaurant_id'    => $restaurant->id,
                 'status'           => OrderStatus::Pending,
